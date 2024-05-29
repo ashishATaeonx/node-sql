@@ -1,11 +1,8 @@
-const mysql = require('mysql2/promise')
+const knex = require('knex');
+const knexConfig = require('../knexfile');
 
+// Initialize Knex with the development environment configuration
+const db = knex(knexConfig.development);
 
-const mySqlPool = mysql.createPool({
-    host: 'localhost',
-    user: 'root',
-    password: 'Ashish@123',
-    database: 'students_db',
-})
+module.exports = db;
 
-module.exports = mySqlPool;
