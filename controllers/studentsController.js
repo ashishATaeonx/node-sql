@@ -1,3 +1,4 @@
+const studentSchema = require('../auth/joiAuth');
 const db = require('../config/db');
 const sendErrorResponse = require('../utils/error');
 
@@ -39,6 +40,13 @@ const getStudent = async (req, res) => {
 // Create Student record
 const createStudent = async (req, res) => {
   try {
+    const { error } = studentSchema.validate(req.body);
+    if (error) {
+      return res.status(400).send({
+        success: false,
+        message: error.message
+      });
+    }
     const { id, name, roll_no, fees, classname } = req.body;
     await db('students').insert({ id, name, roll_no, fees, class: classname });
     res.status(201).send({
@@ -55,6 +63,13 @@ const createStudent = async (req, res) => {
 const updateStudent = async (req, res) => {
   try {
     const studentId = req.params.id;
+    const { error } = studentSchema.validate(req.body);
+    if (error) {
+      return res.status(400).send({
+        success: false,
+        message: error.message
+      });
+    }
     const { id, name, roll_no, fees, classname } = req.body;
     await db('students').where({ id: studentId }).update({ id, name, roll_no, fees, class: classname });
     res.status(200).send({
@@ -82,9 +97,3 @@ const deleteStudent = async (req, res) => {
 };
 
 module.exports = { getStudents, getStudent, createStudent, updateStudent, deleteStudent };
-
-
-
-
-
-
