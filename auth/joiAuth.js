@@ -7,6 +7,7 @@ const studentSchema = Joi.object({
     roll_no: Joi.number().required().error(new Error('Roll number is required.')),
     fees: Joi.number().required().error(new Error('Fees is required and must be a number.')),
     classname: Joi.number().required().error(new Error('Classname is required.')),
+    password: Joi.string().required().error(new Error('password is required.')),
 });
 
 module.exports = studentSchema;

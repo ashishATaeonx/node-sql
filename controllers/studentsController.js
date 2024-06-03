@@ -1,6 +1,18 @@
 const studentSchema = require('../auth/joiAuth');
 const db = require('../config/db');
 const sendErrorResponse = require('../utils/error');
+const md5 = require('md5');
+const jwt = require('jsonwebtoken');
+
+const generateAccessToken = (student) => {
+  return jwt.sign(student, process.env.TOKEN_SECRET, {
+    expiresIn: '15m',
+  })
+}
+
+const generateRefreshToken = (studentId) => {
+  return jwt.sign({ studentId }, process.env.TOKEN_SECRET, { expiresIn: '7d' });
+};
 
 // Get All Students
 const getStudents = async (req, res) => {
@@ -47,12 +59,17 @@ const createStudent = async (req, res) => {
         message: error.message
       });
     }
-    const { id, name, roll_no, fees, classname } = req.body;
-    await db('students').insert({ id, name, roll_no, fees, class: classname });
+    const { id, name, roll_no, fees, classname, password } = req.body;
+
+    const hashedPassword = md5(password);
+
+    await db('students').insert({ id, name, roll_no, fees, class: classname, password: hashedPassword });
+
+
     res.status(201).send({
       success: true,
       message: "Student Record Created",
-      studentData: { id, name, roll_no, fees, classname }
+      studentData: { id, name, roll_no, fees, classname, password }
     });
   } catch (error) {
     sendErrorResponse(res, 500, "Error in creating student record", error);
@@ -98,40 +115,59 @@ const deleteStudent = async (req, res) => {
 
 
 // Login student
-
-const loginStudent = async (req, res, next) => {
+const loginStudent = async (req, res) => {
   try {
-    const { name, roll_no } = req.body;
-    
-    if(!name || !roll_no) return res.status(404).json({
+    const { name, password } = req.body;
+
+    if (!name || !password) return res.status(400).json({
       success: false,
-      message: "Provide All Students credentials",
-    })
+      message: "Provide all student credentials",
+    });
 
-    const student = await db('students').where({name}).first();
+    const student = await db('students').where({ name }).first();
 
-    if(!student) {
-      return res.status(404).json({
+    if (!student || student.password !== md5(password)) {
+      return res.status(401).json({
         success: false,
-        message: "Students with this name is not available",
-      })
+        message: "Invalid credentials"
+      });
     }
 
-    console.log(student);
+    const accessToken = generateAccessToken({ id: student.id, name: student.name, roll_no: student.roll_no });
+    
+    const refreshToken = generateRefreshToken(student.id);
 
-    req.student = student;
+    await db('students').where({ id: student.id }).update({ refreshToken: refreshToken });
 
     res.status(200).json({
       success: true,
-      message: "Login Successfull",
-    })
-
-    next();
-
-    
+      message: "Login Successful",
+      accessToken: accessToken,
+      refreshToken: refreshToken
+    });
   } catch (error) {
-    sendErrorResponse(res, 500, "Error in registering student");
+    sendErrorResponse(res, 500, "Error in logging in", error);
   }
-}
+};
 
-module.exports = { getStudents, getStudent, createStudent, updateStudent, deleteStudent, loginStudent };
+const logoutStudent = async (req, res) => {
+  try {
+    const { id } = req.studentData;
+    await db('students').where({ id }).update({ refreshToken: null });
+
+    res.status(200).json({
+      success: true,
+      message: "Logout Successful"
+    });
+  } catch (error) {
+    console.error("Error in logout:", error);
+    res.status(500).json({
+      success: false,
+      message: "Error in logging out",
+      error: error.message
+    });
+  }
+};
+
+
+module.exports = { getStudents, getStudent, createStudent, updateStudent, deleteStudent, loginStudent, logoutStudent };
