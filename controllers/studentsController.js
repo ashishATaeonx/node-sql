@@ -37,7 +37,7 @@ const getStudent = async (req, res) => {
   }
 };
 
-// Create Student record
+// Register Student record
 const createStudent = async (req, res) => {
   try {
     const { error } = studentSchema.validate(req.body);
@@ -96,4 +96,42 @@ const deleteStudent = async (req, res) => {
   }
 };
 
-module.exports = { getStudents, getStudent, createStudent, updateStudent, deleteStudent };
+
+// Login student
+
+const loginStudent = async (req, res, next) => {
+  try {
+    const { name, roll_no } = req.body;
+    
+    if(!name || !roll_no) return res.status(404).json({
+      success: false,
+      message: "Provide All Students credentials",
+    })
+
+    const student = await db('students').where({name}).first();
+
+    if(!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Students with this name is not available",
+      })
+    }
+
+    console.log(student);
+
+    req.student = student;
+
+    res.status(200).json({
+      success: true,
+      message: "Login Successfull",
+    })
+
+    next();
+
+    
+  } catch (error) {
+    sendErrorResponse(res, 500, "Error in registering student");
+  }
+}
+
+module.exports = { getStudents, getStudent, createStudent, updateStudent, deleteStudent, loginStudent };
