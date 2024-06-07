@@ -2,6 +2,7 @@ import express from 'express'
 import dotenv from 'dotenv'
 import morgan from 'morgan';
 import studentRoutes from './routes/studentsRoutes.js'
+import classRoutes from './routes/classRoutes.js'
 import db from './config/db.js';
 
 const app = express();
@@ -15,6 +16,7 @@ dotenv.config();
 
 // student routes
 app.use('/api/v1/student', studentRoutes)
+app.use('/api/v1/class', classRoutes)
 
 const PORT = process.env.PORT || 4000;
 
