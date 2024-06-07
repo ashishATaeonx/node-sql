@@ -1,8 +1,8 @@
-const studentSchema = require('../auth/joiAuth');
-const db = require('../config/db');
-const sendErrorResponse = require('../utils/error');
-const md5 = require('md5');
-const jwt = require('jsonwebtoken');
+import studentSchema from '../auth/joiAuth.js'
+import db from '../config/db.js'
+import sendErrorResponse from '../utils/error.js'
+import jwt from 'jsonwebtoken'
+import md5 from 'md5'
 
 const generateAccessToken = (student) => {
   return jwt.sign(student, process.env.TOKEN_SECRET, {
@@ -15,7 +15,7 @@ const generateRefreshToken = (studentId) => {
 };
 
 // Get All Students
-const getStudents = async (req, res) => {
+export const getStudents = async (req, res) => {
   try {
     const studentsData = await db('students').select('*');
     res.status(200).send({
@@ -29,7 +29,7 @@ const getStudents = async (req, res) => {
 };
 
 // Get One Student
-const getStudent = async (req, res) => {
+export const getStudent = async (req, res) => {
   try {
     const studentId = req.params.id;
     const studentData = await db('students').where({ id: studentId }).first();
@@ -50,7 +50,7 @@ const getStudent = async (req, res) => {
 };
 
 // Register Student record
-const createStudent = async (req, res) => {
+export const createStudent = async (req, res) => {
   try {
     const { error } = studentSchema.validate(req.body);
     if (error) {
@@ -77,7 +77,7 @@ const createStudent = async (req, res) => {
 };
 
 // Update Student record
-const updateStudent = async (req, res) => {
+export const updateStudent = async (req, res) => {
   try {
     const studentId = req.params.id;
     const { error } = studentSchema.validate(req.body);
@@ -100,7 +100,7 @@ const updateStudent = async (req, res) => {
 };
 
 // Delete Student record
-const deleteStudent = async (req, res) => {
+export const deleteStudent = async (req, res) => {
   try {
     const studentId = req.params.id;
     await db('students').where({ id: studentId }).del();
@@ -115,7 +115,7 @@ const deleteStudent = async (req, res) => {
 
 
 // Login student
-const loginStudent = async (req, res) => {
+export const loginStudent = async (req, res) => {
   try {
     const { name, password } = req.body;
 
@@ -150,7 +150,7 @@ const loginStudent = async (req, res) => {
   }
 };
 
-const logoutStudent = async (req, res) => {
+export const logoutStudent = async (req, res) => {
   try {
     const { id } = req.studentData;
     await db('students').where({ id }).update({ refreshToken: null });
@@ -170,4 +170,3 @@ const logoutStudent = async (req, res) => {
 };
 
 
-module.exports = { getStudents, getStudent, createStudent, updateStudent, deleteStudent, loginStudent, logoutStudent };

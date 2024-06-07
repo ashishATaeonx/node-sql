@@ -1,6 +1,6 @@
-const express = require('express');
-const { getStudents, getStudent, createStudent, updateStudent, deleteStudent, loginStudent, logoutStudent } = require('../controllers/studentsController');
-const verifyToken = require('../auth/jwt');
+import express from "express"
+import {verifyToken} from '../auth/jwt.js'
+import { getStudents, getStudent, createStudent, updateStudent, deleteStudent, loginStudent, logoutStudent } from '../controllers/studentsController.js'
 
 // router object
 const router = express.Router();
@@ -13,4 +13,6 @@ router.put('/update/:id', updateStudent);
 router.delete('/delete/:id', deleteStudent);
 router.post('/login', loginStudent);
 router.post('/logout',verifyToken, logoutStudent);
-module.exports = router;
+
+
+export default router;

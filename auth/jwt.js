@@ -1,7 +1,7 @@
-const jwt = require('jsonwebtoken');
-const sendErrorResponse = require('../utils/error');
+import jwt from 'jsonwebtoken'
+import sendErrorResponse from '../utils/error.js';
 
-const verifyToken = (req, res, next) => {
+export const verifyToken = (req, res, next) => {
     const accessToken = req.headers['authorization'];
   
     if (!accessToken) {
@@ -22,4 +22,3 @@ const verifyToken = (req, res, next) => {
   };
   
 
-module.exports = verifyToken;

@@ -1,4 +1,4 @@
-const Joi = require('joi');
+import Joi from 'joi';
 
 // Joi schema for student data validation
 const studentSchema = Joi.object({
@@ -10,4 +10,4 @@ const studentSchema = Joi.object({
     password: Joi.string().required().error(new Error('password is required.')),
 });
 
-module.exports = studentSchema;
+export default studentSchema;

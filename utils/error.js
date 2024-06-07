@@ -9,4 +9,4 @@ const sendErrorResponse = (res, status, message, error) => {
   };
   
 
-  module.exports = sendErrorResponse;
+  export default sendErrorResponse;
